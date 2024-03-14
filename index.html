@@ -14,14 +14,13 @@
         }
 
         img {
-            height: 100%;
             overflow: hidden;
         }
         canvas {
             position: absolute;
             top: 0;
             left: 0;
-            opacity: 0.95; /* Adjust as necessary, with 1 being fully opaque and 0 fully transparent */
+            opacity: 0.97; /* Adjust as necessary, with 1 being fully opaque and 0 fully transparent */
         }
     </style>
 </head>
@@ -35,7 +34,7 @@
             return params.get('imageURL'); // 'imageURL' is the parameter name in the URL
         }
 
-        const radius = 50;
+        const radius = new URLSearchParams(window.location.search).get('radius') || 50;
         document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
@@ -46,7 +45,17 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            const imageUrl = getImageUrlFromParams();
+            const scaling = new URLSearchParams(window.location.search).get('scaling');
+            if (scaling && scaling === "height") {
+                img.style.height = "100%";
+            } else if (scaling && scaling === "width") {
+                img.style.width = "100%";
+            } else {
+                img.style.height = "100%";
+                img.style.width = "100%";
+            }
+
+            const imageUrl = new URLSearchParams(window.location.search).get('imageURL');
             if (imageUrl) {
                 img.src = imageUrl;
             }
