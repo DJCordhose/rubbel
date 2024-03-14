@@ -55,6 +55,9 @@
                 img.style.width = "100%";
             }
 
+            const opacity = new URLSearchParams(window.location.search).get('opacity') || 0.97;
+            canvas.style.opacity = opacity;
+
             const imageUrl = new URLSearchParams(window.location.search).get('imageURL');
             if (imageUrl) {
                 img.src = imageUrl;
