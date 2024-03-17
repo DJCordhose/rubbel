@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ball Animation Frame Rate Control</title>
+</head>
+
+<body>
+    <canvas id="ballCanvas" width="400" height="400" style="border: 1px solid #000"></canvas>
+    <script>
+        let clickSound = new Audio('//static.base64.guru/uploads/media/beep.mp3');
+        let scoreSound = new Audio('//static.base64.guru/uploads/media/beep.mp3');
+
+        let canvas = document.getElementById("ballCanvas");
+        let ctx = canvas.getContext("2d");
+        let ballRadius = 10;
+        let x = canvas.width / 2;
+        let y = canvas.height - 4 * ballRadius;
+        let dx = 0.1; // Horizontal speed
+        let dy = -0.1; // Vertical speed
+        let lastTime = 0;
+        let fps = 60;
+        let acceleration = 0.05; // The acceleration when the ball is clicked
+        let score = 0; // Score
+        let gameOver = false; // Game over flag
+        let remainingTime = 60 * 1000; // Remaining time in seconds
+        let gameStarted = false; // Whether the game has started
+
+        function drawRemainingTime() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Remaining Time: " + Math.ceil(remainingTime / 1000), canvas.width - 170, 20);
+        }
+
+        function drawMessage() {
+            if (!gameStarted || gameOver) {
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "#0095DD";
+                ctx.fillText("Tap to start / restart the game", canvas.width / 2 - 100, canvas.height / 2);
+                return true;
+            }
+            return false;
+        }
+
+        canvas.addEventListener("click", function (event) {
+            if (!gameStarted || gameOver) {
+                // Reset game variables
+                x = canvas.width / 2;
+                y = canvas.height - 4 * ballRadius;
+                dx = 0.1;
+                dy = -0.1;
+                score = 0;
+                gameOver = false;
+                remainingTime = 60 * 1000;
+
+                // Start the game
+                gameStarted = true;
+                requestAnimationFrame(animate);
+            } else {
+
+                let rect = canvas.getBoundingClientRect();
+                let clickX = event.clientX - rect.left;
+                let clickY = event.clientY - rect.top;
+
+                // Calculate the direction vector from the ball to the click position
+                let directionX = clickX - x;
+                let directionY = clickY - y;
+
+                // Normalize the direction vector to get a direction vector of length 1
+                let length = Math.sqrt(directionX * directionX + directionY * directionY);
+                directionX /= length;
+                directionY /= length;
+
+                // Multiply the direction vector by the acceleration to get the acceleration vector
+                let accelerationX = directionX * acceleration;
+                let accelerationY = directionY * acceleration;
+
+                // Add the acceleration vector to the ball's velocity vector
+                dx += accelerationX;
+                dy += accelerationY;
+
+                clickSound.play();
+            }
+        });
+
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Score: " + score, 8, 20);
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function animate(timeStamp) {
+            if (drawMessage()) {
+                setTimeout(function () {
+                    requestAnimationFrame(animate);
+                }, 1000 / fps);
+
+                return;
+            }
+
+            let deltaTime = timeStamp - lastTime;
+            lastTime = timeStamp;
+
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();
+
+            remainingTime -= deltaTime; // Decrement remaining time
+            drawRemainingTime(); // Draw remaining time
+
+
+            // Adjust the position based on velocity and deltaTime
+            x += dx * deltaTime;
+            y += dy * deltaTime;
+
+            // Reverse the velocity direction if the ball hits the canvas boundaries
+            if (
+                x + dx * deltaTime > canvas.width - ballRadius ||
+                x + dx * deltaTime < ballRadius
+            ) {
+                dx = -dx;
+                score++; // Increment score
+
+                scoreSound.play();
+            }
+            if (
+                y + dy * deltaTime > canvas.height - ballRadius ||
+                y + dy * deltaTime < ballRadius
+            ) {
+                gameOver = true; // End game
+            }
+
+            drawScore(); // Draw score
+
+            if (remainingTime <= 0) {
+                gameOver = true; // End game
+            }
+
+            if (!gameOver) {
+                setTimeout(function () {
+                    requestAnimationFrame(animate);
+                }, 1000 / fps);
+            }
+        }
+        requestAnimationFrame(animate);
+    </script>
+</body>
+
+</html>
