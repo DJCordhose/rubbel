@@ -8,8 +8,11 @@
 <body>
     <canvas id="ballCanvas" width="400" height="400" style="border: 1px solid #000"></canvas>
     <script>
-        let clickSound = new Audio('//static.base64.guru/uploads/media/beep.mp3');
-        let scoreSound = new Audio('//static.base64.guru/uploads/media/beep.mp3');
+        // let clickSound = new Audio('//static.base64.guru/uploads/media/beep.mp3');
+        // let scoreSound = new Audio('//static.base64.guru/uploads/media/beep.mp3');
+        let clickSound = new Audio('//github.com/DJCordhose/rubbel/raw/main/sandbox/click.m4a');
+        let scoreSound = new Audio('//github.com/DJCordhose/rubbel/raw/main/sandbox/click.m4a');
+
 
         let canvas = document.getElementById("ballCanvas");
         let ctx = canvas.getContext("2d");
@@ -25,6 +28,10 @@
         let gameOver = false; // Game over flag
         let remainingTime = 60 * 1000; // Remaining time in seconds
         let gameStarted = false; // Whether the game has started
+        let backgroundImage = new Image();
+        backgroundImage.src = 'background.jpg';
+        let ballImage = new Image();
+        ballImage.src = 'ball.jpg';
 
         function drawRemainingTime() {
             ctx.font = "16px Arial";
@@ -89,13 +96,18 @@
             ctx.fillText("Score: " + score, 8, 20);
         }
 
+        // function drawBall() {
+        //     ctx.beginPath();
+        //     ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        //     ctx.fillStyle = "#0095DD";
+        //     ctx.fill();
+        //     ctx.closePath();
+        // }
+
         function drawBall() {
-            ctx.beginPath();
-            ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = "#0095DD";
-            ctx.fill();
-            ctx.closePath();
+            ctx.drawImage(ballImage, x - ballRadius, y - ballRadius, ballRadius * 2, ballRadius * 2);
         }
+
 
         function animate(timeStamp) {
             if (drawMessage()) {
@@ -111,6 +123,9 @@
 
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw the background image
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
             drawBall();
 
             remainingTime -= deltaTime; // Decrement remaining time
