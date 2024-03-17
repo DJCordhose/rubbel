@@ -29,9 +29,9 @@
         let remainingTime = 60 * 1000; // Remaining time in seconds
         let gameStarted = false; // Whether the game has started
         let backgroundImage = new Image();
-        backgroundImage.src = 'background.jpg';
+        backgroundImage.src = '//github.com/DJCordhose/rubbel/raw/main/sandbox/background.jpg';
         let ballImage = new Image();
-        ballImage.src = 'ball.jpg';
+        ballImage.src = '//github.com/DJCordhose/rubbel/raw/main/sandbox/ball.jpg';
 
         function drawRemainingTime() {
             ctx.font = "16px Arial";
@@ -117,6 +117,9 @@
 
                 return;
             }
+            // Cover the canvas with a semi-transparent rectangle
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             let deltaTime = timeStamp - lastTime;
             lastTime = timeStamp;
@@ -136,23 +139,24 @@
             x += dx * deltaTime;
             y += dy * deltaTime;
 
+            // Adjust the position based on velocity and deltaTime
+            x += dx * deltaTime;
+            y += dy * deltaTime;
+
             // Reverse the velocity direction if the ball hits the canvas boundaries
-            if (
-                x + dx * deltaTime > canvas.width - ballRadius ||
-                x + dx * deltaTime < ballRadius
-            ) {
+            if ((x > canvas.width - ballRadius && dx > 0) ||
+                (x < ballRadius && dx < 0)) {
+                x = dx > 0 ? canvas.width - ballRadius : ballRadius; // Adjust position
                 dx = -dx;
                 score++; // Increment score
-
                 scoreSound.play();
             }
-            if (
-                y + dy * deltaTime > canvas.height - ballRadius ||
-                y + dy * deltaTime < ballRadius
-            ) {
+            if ((y > canvas.height - ballRadius && dy > 0) ||
+                (y < ballRadius && dy < 0)) {
+                y = dy > 0 ? canvas.height - ballRadius : ballRadius; // Adjust position
+                dy = -dy;
                 gameOver = true; // End game
             }
-
             drawScore(); // Draw score
 
             if (remainingTime <= 0) {
