@@ -25,20 +25,17 @@
     </style>
 </head>
 <body>
+    <input type="file" id="filePicker" accept="image/*" style="position:absolute;z-index:2;top:10px;left:10px;display: none;">
     <canvas id="scratchCanvas"></canvas>
     <img id="imageToReveal" src="storyboard.png" >
 
     <script>
-        function getImageUrlFromParams() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('imageURL'); // 'imageURL' is the parameter name in the URL
-        }
-
         const radius = new URLSearchParams(window.location.search).get('radius') || 50;
         document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
             const img = document.getElementById('imageToReveal');
+            const filePicker = document.getElementById('filePicker');
             let isScratching = false;
 
             // Set canvas size to fill window
@@ -61,14 +58,26 @@
             const imageUrl = new URLSearchParams(window.location.search).get('imageURL');
             if (imageUrl) {
                 img.src = imageUrl;
+            } else {
+                // display file picker
+                filePicker.style.display = 'block';
+                // File picker logic
+                filePicker.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
             }
-
             // Load image and draw overlay
             img.onload = () => {
-                // Draw the image off-screen
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                // Draw overlay
-                ctx.fillStyle = 'gray'; // Change the overlay color if needed
+                ctx.fillStyle = 'gray';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             };
 
@@ -88,10 +97,9 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                ctx.beginPath(); // Start a new path to draw the circle
-                // Scratch effect size
+                ctx.beginPath();
                 ctx.globalCompositeOperation = 'destination-out';
-                ctx.arc(x, y, radius, 0, Math.PI * 2, true); // Change the radius for a larger or smaller effect
+                ctx.arc(x, y, radius, 0, Math.PI * 2, true);
                 ctx.fill();
             }
 
@@ -104,7 +112,7 @@
             // Touch events for mobile
             canvas.addEventListener('touchstart', (e) => startScratch(e.touches[0]));
             canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault(); // Prevent scrolling
+                e.preventDefault();
                 scratch(e.touches[0]);
             });
             canvas.addEventListener('touchend', endScratch);
